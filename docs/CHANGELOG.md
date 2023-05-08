@@ -31,3 +31,13 @@ I decided to replace the `os.system()` calls with `subprocess.run()` as
 deprecated.
 
 The code in this commit is untested, and might not run.
+
+-----------------------------------------------------------------------
+
+### **Git commit**: `0e8eafe228e207e66c38eaf3cd22ea0b28a53de7`
+*By* ***MolassesLover*** 
+
+-----------------------------------------------------------------------
+
+Before creating `/mnt/{mntdir}` or `/mnt/boot/efi`, the script will
+now check whether or not the directory has already been made.
