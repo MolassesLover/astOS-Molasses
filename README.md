@@ -1,5 +1,13 @@
 # astOS (Arch Snapshot Tree OS)
-### An immutable Arch based distribution utilizing btrfs snapshots  
+## Molasses flavoured!
+
+[![Ko-Fi](https://img.shields.io/badge/donate-kofi-blue?style=for-the-badge&logo=ko-fi&color=e57578&logoColor=FFFFFF&labelColor=262a35)](https://ko-fi.com/molasses)
+[![Patreon](https://img.shields.io/badge/donate-patreon-blue?style=for-the-badge&logo=patreon&color=e57578&logoColor=FFFFFF&labelColor=262a35)](https://www.patreon.com/molasseslover)
+
+> **Warning**: This is the `downstream` branch of [@MolassesLover's](https://github.com/MolassesLover)
+astOS fork. The [original repository](https://github.com/CuBeRJAN/astOS) by 
+[@CuBeRJAN](https://github.com/CuBeRJAN) differs significantly. I do not have 
+contact with them, and they may approach the development of astOS very differently.
 
 ![astos-logo](docs/img/logo.jpg)
 
