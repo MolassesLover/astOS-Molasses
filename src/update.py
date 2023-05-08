@@ -20,4 +20,3 @@ upstate.close()
 
 if "1" not in line:
     os.system("/usr/local/sbin/ast deploy $(/usr/local/sbin/ast c)")
-
