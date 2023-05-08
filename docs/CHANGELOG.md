@@ -5,6 +5,7 @@
 -----------------------------------------------------------------------
 
 ### **Git commit**: `b29fa6eb243c1c22130f3ab6b4faa12eeb3dc491`
+*By* ***MolassesLover*** 
 
 -----------------------------------------------------------------------
 
@@ -17,3 +18,16 @@ variation, sourced directly from [gnu.org](https://www.gnu.org/).
 
 Lastly, the Python (`.py`) files were reformatted with the
 [Black code formatter](https://pypi.org/project/black/23.3.0/).
+
+-----------------------------------------------------------------------
+
+### **Git commit**: `f6ba0b92e65911e2981e2701918d5d9d0d7ce02f`
+*By* ***MolassesLover*** 
+
+-----------------------------------------------------------------------
+
+I decided to replace the `os.system()` calls with `subprocess.run()` as
+`os.system()` is very vulnerable to shell injection. Regardless, it's
+deprecated.
+
+The code in this commit is untested, and might not run.
