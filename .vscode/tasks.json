@@ -1,0 +1,11 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Run live image in QEMU",
+            "type": "shell",
+            "command": "sh ${workspaceFolder}/src/dev/run_in_qemu.sh",
+            "problemMatcher": []
+        }
+    ]
+}
