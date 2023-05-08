@@ -53,3 +53,15 @@ Added the Arch live image profile, and created a basic SConstruct file
 to build the image.
 
 I also updated shebangs to be more consistent, and  inclusive.
+
+-----------------------------------------------------------------------
+
+## **Git commit**: `ac43e290aeb9d3d82f0b3b7142ab5b80a7b42b32`
+*By* ***MolassesLover*** 
+
+-----------------------------------------------------------------------
+
+This commit introduced the "Run live image in QEMU" task for
+Visual Studio Code. As the name might suggest, it loads the live image
+into QEMU. The task specifically runs the
+[run_in_qemu.sh](src/dev/run_in_qemu.sh) script
