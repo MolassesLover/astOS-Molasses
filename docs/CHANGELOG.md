@@ -41,3 +41,15 @@ The code in this commit is untested, and might not run.
 
 Before creating `/mnt/{mntdir}` or `/mnt/boot/efi`, the script will
 now check whether or not the directory has already been made.
+
+-----------------------------------------------------------------------
+
+## **Git commit**: `244539a070d10b05946d366c63cf4fd3d2e9244b`
+*By* ***MolassesLover*** 
+
+-----------------------------------------------------------------------
+
+Added the Arch live image profile, and created a basic SConstruct file
+to build the image.
+
+I also updated shebangs to be more consistent, and  inclusive.
