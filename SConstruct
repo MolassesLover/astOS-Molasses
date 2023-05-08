@@ -23,7 +23,7 @@ def build():
     subprocess.run(
         shell=True,
         check=True,
-        args="sudo mkarchiso -v -w /tmp/astOS-tmp src",
+        args="sudo mkarchiso -v -w /tmp/astOS-tmp live",
         stdout=subprocess.DEVNULL,
     )
 
