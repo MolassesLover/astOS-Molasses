@@ -36,7 +36,12 @@
 # Binaries
 [Bb]uild
 [Bb]in
+[Oo][Uu][Tt]
 [Tt]arget
+
+# Live image
+*.iso
+*.img
 
 # Do not ignore these, they aren't binaries:
 !live/airootfs/usr/local/bin
