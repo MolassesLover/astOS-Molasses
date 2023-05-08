@@ -5,14 +5,14 @@ import sys
 import subprocess
 
 # TODO: the installer needs a proper rewrite
-# TODO: Use native functions instead of os.system()
+# TODO: Use native functions instead of subprocess.run(shell=True, check=True, args=)
 # TODO: Append to package list instead of pacstrapping a gazillion times
 
 args = list(sys.argv)
 
 
 def clear():
-    os.system("clear")
+    subprocess.run(shell=True, check=True, args="clear")
 
 
 def to_uuid(part):
@@ -21,7 +21,11 @@ def to_uuid(part):
 
 
 def strap(packages):
-    excode = int(os.system(f'pacstrap /mnt --needed {" ".join(packages)}'))
+    excode = int(
+        subprocess.run(
+            shell=True, check=True, args=f'pacstrap /mnt --needed {" ".join(packages)}'
+        )
+    )
     if excode != 0:
         print("Failed to download packages!")
     return excode
@@ -83,7 +87,7 @@ uURF$##Bv       nKWB$%ABc       aM@3R@D@b
         print("Select a timezone (type list to list):")
         zone = input("> ")
         if zone == "list":
-            os.system("ls /usr/share/zoneinfo | less")
+            subprocess.run(shell=True, check=True, args="ls /usr/share/zoneinfo | less")
         else:
             timezone = str(f"/usr/share/zoneinfo/{zone}")
             break
@@ -92,38 +96,42 @@ uURF$##Bv       nKWB$%ABc       aM@3R@D@b
     print("Enter hostname:")
     hostname = input("> ")
 
-    os.system("pacman -Syy --noconfirm archlinux-keyring")
-    os.system(f"mkfs.btrfs -f {args[1]}")
+    subprocess.run(
+        shell=True, check=True, args="pacman -Syy --noconfirm archlinux-keyring"
+    )
+    subprocess.run(shell=True, check=True, args=f"mkfs.btrfs -f {args[1]}")
 
     efi = os.path.exists("/sys/firmware/efi")
 
-    os.system(f"mount {args[1]} /mnt")
+    subprocess.run(shell=True, check=True, args=f"mount {args[1]} /mnt")
     btrdirs = ["@", "@.snapshots", "@home", "@var", "@etc", "@boot"]
     mntdirs = ["", ".snapshots", "home", "var", "etc", "boot"]
 
     for btrdir in btrdirs:
-        os.system(f"btrfs sub create /mnt/{btrdir}")
+        subprocess.run(shell=True, check=True, args=f"btrfs sub create /mnt/{btrdir}")
 
-    os.system("umount /mnt")
+    subprocess.run(shell=True, check=True, args="umount /mnt")
 
     for mntdir in mntdirs:
-        os.system(f"mkdir /mnt/{mntdir}")
-        os.system(
-            f"mount {args[1]} -o \
+        subprocess.run(shell=True, check=True, args=f"mkdir /mnt/{mntdir}")
+        subprocess.run(
+            shell=True,
+            check=True,
+            args=f"mount {args[1]} -o \
             subvol={btrdirs[mntdirs.index(mntdir)]},compress=zstd,noatime \
-            /mnt/{mntdir}"
+            /mnt/{mntdir}",
         )
 
     for i in ("tmp", "root"):
-        os.system(f"mkdir -p /mnt/{i}")
+        subprocess.run(shell=True, check=True, args=f"mkdir -p /mnt/{i}")
     for i in ("ast", "boot", "etc", "root", "rootfs", "tmp", "var"):
-        os.system(f"mkdir -p /mnt/.snapshots/{i}")
+        subprocess.run(shell=True, check=True, args=f"mkdir -p /mnt/.snapshots/{i}")
     for i in ("root", "tmp"):
-        os.system(f"mkdir -p /mnt/.snapshots/ast/{i}")
+        subprocess.run(shell=True, check=True, args=f"mkdir -p /mnt/.snapshots/ast/{i}")
 
     if efi:
-        os.system("mkdir /mnt/boot/efi")
-        os.system(f"mount {args[3]} /mnt/boot/efi")
+        subprocess.run(shell=True, check=True, args="mkdir /mnt/boot/efi")
+        subprocess.run(shell=True, check=True, args=f"mount {args[3]} /mnt/boot/efi")
 
     packages = [
         "base",
@@ -173,8 +181,8 @@ uURF$##Bv       nKWB$%ABc       aM@3R@D@b
 
     astpart = to_uuid(args[1])
 
-    os.system("mkdir -p /mnt/usr/share/ast/db")
-    os.system("echo '0' > /mnt/usr/share/ast/snap")
+    subprocess.run(shell=True, check=True, args="mkdir -p /mnt/usr/share/ast/db")
+    subprocess.run(shell=True, check=True, args="echo '0' > /mnt/usr/share/ast/snap")
 
     with open("/mnt/etc/os-release", "w") as f:
         f.write(
@@ -187,50 +195,92 @@ HOME_URL="https://github.com/CuBeRJAN/astOS"
 LOGO="astos-logo"
 """
         )
-    os.system("cp -r /mnt/var/lib/pacman/* /mnt/usr/share/ast/db")
-    os.system(
-        'sed -i s,"#DBPath      = /var/lib/pacman/","DBPath      = /usr/share/ast/db/",g /mnt/etc/pacman.conf'
+    subprocess.run(
+        shell=True, check=True, args="cp -r /mnt/var/lib/pacman/* /mnt/usr/share/ast/db"
     )
-    os.system("echo 'DISTRIB_ID=\"astOS\"' > /mnt/etc/lsb-release")
-    os.system("echo 'DISTRIB_RELEASE=\"rolling\"' >> /mnt/etc/lsb-release")
-    os.system("echo 'DISTRIB_DESCRIPTION=astOS' >> /mnt/etc/lsb-release")
+    subprocess.run(
+        shell=True,
+        check=True,
+        args='sed -i s,"#DBPath      = /var/lib/pacman/","DBPath      = /usr/share/ast/db/",g /mnt/etc/pacman.conf',
+    )
+    subprocess.run(
+        shell=True,
+        check=True,
+        args="echo 'DISTRIB_ID=\"astOS\"' > /mnt/etc/lsb-release",
+    )
+    subprocess.run(
+        shell=True,
+        check=True,
+        args="echo 'DISTRIB_RELEASE=\"rolling\"' >> /mnt/etc/lsb-release",
+    )
+    subprocess.run(
+        shell=True,
+        check=True,
+        args="echo 'DISTRIB_DESCRIPTION=astOS' >> /mnt/etc/lsb-release",
+    )
 
-    os.system(f"arch-chroot /mnt ln -sf {timezone} /etc/localtime")
-    os.system("echo 'en_US UTF-8' >> /mnt/etc/locale.gen")
-    #    os.system("sed -i s/'^#'// /mnt/etc/locale.gen")
-    #    os.system("sed -i s/'^ '/'#'/ /mnt/etc/locale.gen")
-    os.system("arch-chroot /mnt locale-gen")
-    os.system("arch-chroot /mnt hwclock --systohc")
-    os.system("echo 'LANG=en_US.UTF-8' > /mnt/etc/locale.conf")
-    os.system(f"echo {hostname} > /mnt/etc/hostname")
+    subprocess.run(
+        shell=True,
+        check=True,
+        args=f"arch-chroot /mnt ln -sf {timezone} /etc/localtime",
+    )
+    subprocess.run(
+        shell=True, check=True, args="echo 'en_US UTF-8' >> /mnt/etc/locale.gen"
+    )
+    #    subprocess.run(shell=True, check=True, args="sed -i s/'^#'// /mnt/etc/locale.gen")
+    #    subprocess.run(shell=True, check=True, args="sed -i s/'^ '/'#'/ /mnt/etc/locale.gen")
+    subprocess.run(shell=True, check=True, args="arch-chroot /mnt locale-gen")
+    subprocess.run(shell=True, check=True, args="arch-chroot /mnt hwclock --systohc")
+    subprocess.run(
+        shell=True, check=True, args="echo 'LANG=en_US.UTF-8' > /mnt/etc/locale.conf"
+    )
+    subprocess.run(shell=True, check=True, args=f"echo {hostname} > /mnt/etc/hostname")
 
-    os.system(
-        "sed -i '0,/@/{s,@,@.snapshots/rootfs/snapshot-tmp,}' \
-    /mnt/etc/fstab"
+    subprocess.run(
+        shell=True,
+        check=True,
+        args="sed -i '0,/@/{s,@,@.snapshots/rootfs/snapshot-tmp,}' \
+    /mnt/etc/fstab",
     )
-    os.system(
-        "sed -i '0,/@etc/{s,@etc,@.snapshots/etc/etc-tmp,}' \
-    /mnt/etc/fstab"
+    subprocess.run(
+        shell=True,
+        check=True,
+        args="sed -i '0,/@etc/{s,@etc,@.snapshots/etc/etc-tmp,}' \
+    /mnt/etc/fstab",
     )
-    #    os.system("sed -i '0,/@var/{s,@var,@.snapshots/var/var-tmp,}' \
+    #    subprocess.run(shell=True, check=True, args="sed -i '0,/@var/{s,@var,@.snapshots/var/var-tmp,}' \
     #    /mnt/etc/fstab")
-    os.system(
-        "sed -i '0,/@boot/{s,@boot,@.snapshots/boot/boot-tmp,}' \
-    /mnt/etc/fstab"
+    subprocess.run(
+        shell=True,
+        check=True,
+        args="sed -i '0,/@boot/{s,@boot,@.snapshots/boot/boot-tmp,}' \
+    /mnt/etc/fstab",
     )
-    os.system("mkdir -p /mnt/.snapshots/ast/snapshots")
+    subprocess.run(
+        shell=True, check=True, args="mkdir -p /mnt/.snapshots/ast/snapshots"
+    )
 
-    os.system("cp ./astpk.py /mnt/.snapshots/ast/ast")
-    os.system("arch-chroot /mnt chmod +x /.snapshots/ast/ast")
-    os.system("arch-chroot /mnt ln -s /.snapshots/ast /var/lib/ast")
-    os.system("arch-chroot /mnt chmod 700 /.snapshots/ast/root")
-    os.system("arch-chroot /mnt chmod 1777 /.snapshots/ast/tmp")
+    subprocess.run(shell=True, check=True, args="cp ./astpk.py /mnt/.snapshots/ast/ast")
+    subprocess.run(
+        shell=True, check=True, args="arch-chroot /mnt chmod +x /.snapshots/ast/ast"
+    )
+    subprocess.run(
+        shell=True,
+        check=True,
+        args="arch-chroot /mnt ln -s /.snapshots/ast /var/lib/ast",
+    )
+    subprocess.run(
+        shell=True, check=True, args="arch-chroot /mnt chmod 700 /.snapshots/ast/root"
+    )
+    subprocess.run(
+        shell=True, check=True, args="arch-chroot /mnt chmod 1777 /.snapshots/ast/tmp"
+    )
 
     clear()
     if (
         not DesktopInstall
     ):  # Don't ask for password if doing a desktop install, since root account will be locked anyway (sudo used instead)
-        os.system("arch-chroot /mnt passwd")
+        subprocess.run(shell=True, check=True, args="arch-chroot /mnt passwd")
         while True:
             print("did your password set properly (y/n)?")
             reply = input("> ")
@@ -238,46 +288,96 @@ LOGO="astos-logo"
                 break
             else:
                 clear()
-                os.system("arch-chroot /mnt passwd")
+                subprocess.run(shell=True, check=True, args="arch-chroot /mnt passwd")
 
-    os.system("arch-chroot /mnt systemctl enable NetworkManager")
-    os.system(
-        "echo {\\'name\\': \\'root\\', \\'children\\': [{\\'name\\': \\'0\\'}]} > /mnt/.snapshots/ast/fstree"
+    subprocess.run(
+        shell=True, check=True, args="arch-chroot /mnt systemctl enable NetworkManager"
+    )
+    subprocess.run(
+        shell=True,
+        check=True,
+        args="echo {\\'name\\': \\'root\\', \\'children\\': [{\\'name\\': \\'0\\'}]} > /mnt/.snapshots/ast/fstree",
     )
 
     if DesktopInstall:
-        os.system(
-            "echo {\\'name\\': \\'root\\', \\'children\\': [{\\'name\\': \\'0\\'},{\\'name\\': \\'1\\'}]} > /mnt/.snapshots/ast/fstree"
+        subprocess.run(
+            shell=True,
+            check=True,
+            args="echo {\\'name\\': \\'root\\', \\'children\\': [{\\'name\\': \\'0\\'},{\\'name\\': \\'1\\'}]} > /mnt/.snapshots/ast/fstree",
         )
-        os.system(f"echo '{astpart}' > /mnt/.snapshots/ast/part")
+        subprocess.run(
+            shell=True, check=True, args=f"echo '{astpart}' > /mnt/.snapshots/ast/part"
+        )
 
-    os.system("arch-chroot /mnt sed -i s,Arch,astOS,g /etc/default/grub")
-    os.system(f"arch-chroot /mnt grub-install {args[2]}")
-    os.system(f"arch-chroot /mnt grub-mkconfig {args[2]} -o /boot/grub/grub.cfg")
-    os.system(
-        "sed -i '0,/subvol=@/{s,subvol=@,subvol=@.snapshots/rootfs/snapshot-tmp,g}' /mnt/boot/grub/grub.cfg"
+    subprocess.run(
+        shell=True,
+        check=True,
+        args="arch-chroot /mnt sed -i s,Arch,astOS,g /etc/default/grub",
     )
-    os.system("arch-chroot /mnt ln -s /.snapshots/ast/ast /usr/local/sbin/ast")
-    os.system("btrfs sub snap -r /mnt /mnt/.snapshots/rootfs/snapshot-0")
-    os.system("btrfs sub create /mnt/.snapshots/etc/etc-tmp")
-    #    os.system("btrfs sub create /mnt/.snapshots/var/var-tmp")
-    os.system("btrfs sub create /mnt/.snapshots/boot/boot-tmp")
-    #    os.system("cp --reflink=auto -r /mnt/var/* /mnt/.snapshots/var/var-tmp")
+    subprocess.run(
+        shell=True, check=True, args=f"arch-chroot /mnt grub-install {args[2]}"
+    )
+    subprocess.run(
+        shell=True,
+        check=True,
+        args=f"arch-chroot /mnt grub-mkconfig {args[2]} -o /boot/grub/grub.cfg",
+    )
+    subprocess.run(
+        shell=True,
+        check=True,
+        args="sed -i '0,/subvol=@/{s,subvol=@,subvol=@.snapshots/rootfs/snapshot-tmp,g}' /mnt/boot/grub/grub.cfg",
+    )
+    subprocess.run(
+        shell=True,
+        check=True,
+        args="arch-chroot /mnt ln -s /.snapshots/ast/ast /usr/local/sbin/ast",
+    )
+    subprocess.run(
+        shell=True,
+        check=True,
+        args="btrfs sub snap -r /mnt /mnt/.snapshots/rootfs/snapshot-0",
+    )
+    subprocess.run(
+        shell=True, check=True, args="btrfs sub create /mnt/.snapshots/etc/etc-tmp"
+    )
+    #    subprocess.run(shell=True, check=True, args="btrfs sub create /mnt/.snapshots/var/var-tmp")
+    subprocess.run(
+        shell=True, check=True, args="btrfs sub create /mnt/.snapshots/boot/boot-tmp"
+    )
+    #    subprocess.run(shell=True, check=True, args="cp --reflink=auto -r /mnt/var/* /mnt/.snapshots/var/var-tmp")
     #    for i in ("pacman", "systemd"):
-    #        os.system(f"mkdir -p /mnt/.snapshots/var/var-tmp/lib/{i}")
-    #    os.system("cp --reflink=auto -r /mnt/var/lib/pacman/* /mnt/.snapshots/var/var-tmp/lib/pacman/")
-    #    os.system("cp --reflink=auto -r /mnt/var/lib/systemd/* /mnt/.snapshots/var/var-tmp/lib/systemd/")
-    os.system("cp --reflink=auto -r /mnt/boot/* /mnt/.snapshots/boot/boot-tmp")
-    os.system("cp --reflink=auto -r /mnt/etc/* /mnt/.snapshots/etc/etc-tmp")
-    #    os.system("btrfs sub snap -r /mnt/.snapshots/var/var-tmp /mnt/.snapshots/var/var-0")
-    os.system(
-        "btrfs sub snap -r /mnt/.snapshots/boot/boot-tmp /mnt/.snapshots/boot/boot-0"
+    #        subprocess.run(shell=True, check=True, args=f"mkdir -p /mnt/.snapshots/var/var-tmp/lib/{i}")
+    #    subprocess.run(shell=True, check=True, args="cp --reflink=auto -r /mnt/var/lib/pacman/* /mnt/.snapshots/var/var-tmp/lib/pacman/")
+    #    subprocess.run(shell=True, check=True, args="cp --reflink=auto -r /mnt/var/lib/systemd/* /mnt/.snapshots/var/var-tmp/lib/systemd/")
+    subprocess.run(
+        shell=True,
+        check=True,
+        args="cp --reflink=auto -r /mnt/boot/* /mnt/.snapshots/boot/boot-tmp",
     )
-    os.system("btrfs sub snap -r /mnt/.snapshots/etc/etc-tmp /mnt/.snapshots/etc/etc-0")
-    os.system(f"echo '{astpart}' > /mnt/.snapshots/ast/part")
+    subprocess.run(
+        shell=True,
+        check=True,
+        args="cp --reflink=auto -r /mnt/etc/* /mnt/.snapshots/etc/etc-tmp",
+    )
+    #    subprocess.run(shell=True, check=True, args="btrfs sub snap -r /mnt/.snapshots/var/var-tmp /mnt/.snapshots/var/var-0")
+    subprocess.run(
+        shell=True,
+        check=True,
+        args="btrfs sub snap -r /mnt/.snapshots/boot/boot-tmp /mnt/.snapshots/boot/boot-0",
+    )
+    subprocess.run(
+        shell=True,
+        check=True,
+        args="btrfs sub snap -r /mnt/.snapshots/etc/etc-tmp /mnt/.snapshots/etc/etc-0",
+    )
+    subprocess.run(
+        shell=True, check=True, args=f"echo '{astpart}' > /mnt/.snapshots/ast/part"
+    )
 
     if DesktopInstall == 1:
-        os.system("echo '1' > /mnt/usr/share/ast/snap")
+        subprocess.run(
+            shell=True, check=True, args="echo '1' > /mnt/usr/share/ast/snap"
+        )
         packages.extend(
             [
                 "flatpak",
@@ -312,8 +412,12 @@ LOGO="astos-logo"
                 clear()
                 print("Enter username (all lowercase, max 8 letters)")
                 username = input("> ")
-        os.system(f"arch-chroot /mnt useradd {username}")
-        os.system(f"arch-chroot /mnt passwd {username}")
+        subprocess.run(
+            shell=True, check=True, args=f"arch-chroot /mnt useradd {username}"
+        )
+        subprocess.run(
+            shell=True, check=True, args=f"arch-chroot /mnt passwd {username}"
+        )
         while True:
             print("did your password set properly (y/n)?")
             reply = input("> ")
@@ -321,49 +425,105 @@ LOGO="astos-logo"
                 break
             else:
                 clear()
-                os.system(f"arch-chroot /mnt passwd {username}")
-        os.system(f"arch-chroot /mnt usermod -aG audio,input,video,wheel {username}")
-        os.system("arch-chroot /mnt passwd -l root")
-        os.system("chmod +w /mnt/etc/sudoers")
-        os.system("echo '%wheel ALL=(ALL:ALL) ALL' >> /mnt/etc/sudoers")
-        os.system("chmod -w /mnt/etc/sudoers")
-        os.system(f"arch-chroot /mnt mkdir /home/{username}")
-        os.system(
-            f"echo 'export XDG_RUNTIME_DIR=\"/run/user/1000\"' >> /home/{username}/.bashrc"
+                subprocess.run(
+                    shell=True, check=True, args=f"arch-chroot /mnt passwd {username}"
+                )
+        subprocess.run(
+            shell=True,
+            check=True,
+            args=f"arch-chroot /mnt usermod -aG audio,input,video,wheel {username}",
         )
-        os.system(f"arch-chroot /mnt chown -R {username} /home/{username}")
-        os.system("arch-chroot /mnt systemctl enable gdm")
-        os.system("cp -r /mnt/var/lib/pacman/* /mnt/usr/share/ast/db")
-        os.system("btrfs sub snap -r /mnt /mnt/.snapshots/rootfs/snapshot-1")
-        os.system("btrfs sub del /mnt/.snapshots/etc/etc-tmp")
-        #        os.system("btrfs sub del /mnt/.snapshots/var/var-tmp")
-        os.system("btrfs sub del /mnt/.snapshots/boot/boot-tmp")
-        os.system("btrfs sub create /mnt/.snapshots/etc/etc-tmp")
-        #        os.system("btrfs sub create /mnt/.snapshots/var/var-tmp")
-        os.system("btrfs sub create /mnt/.snapshots/boot/boot-tmp")
-        #        os.system("cp --reflink=auto -r /mnt/var/* /mnt/.snapshots/var/var-tmp")
+        subprocess.run(shell=True, check=True, args="arch-chroot /mnt passwd -l root")
+        subprocess.run(shell=True, check=True, args="chmod +w /mnt/etc/sudoers")
+        subprocess.run(
+            shell=True,
+            check=True,
+            args="echo '%wheel ALL=(ALL:ALL) ALL' >> /mnt/etc/sudoers",
+        )
+        subprocess.run(shell=True, check=True, args="chmod -w /mnt/etc/sudoers")
+        subprocess.run(
+            shell=True, check=True, args=f"arch-chroot /mnt mkdir /home/{username}"
+        )
+        subprocess.run(
+            shell=True,
+            check=True,
+            args=f"echo 'export XDG_RUNTIME_DIR=\"/run/user/1000\"' >> /home/{username}/.bashrc",
+        )
+        subprocess.run(
+            shell=True,
+            check=True,
+            args=f"arch-chroot /mnt chown -R {username} /home/{username}",
+        )
+        subprocess.run(
+            shell=True, check=True, args="arch-chroot /mnt systemctl enable gdm"
+        )
+        subprocess.run(
+            shell=True,
+            check=True,
+            args="cp -r /mnt/var/lib/pacman/* /mnt/usr/share/ast/db",
+        )
+        subprocess.run(
+            shell=True,
+            check=True,
+            args="btrfs sub snap -r /mnt /mnt/.snapshots/rootfs/snapshot-1",
+        )
+        subprocess.run(
+            shell=True, check=True, args="btrfs sub del /mnt/.snapshots/etc/etc-tmp"
+        )
+        #        subprocess.run(shell=True, check=True, args="btrfs sub del /mnt/.snapshots/var/var-tmp")
+        subprocess.run(
+            shell=True, check=True, args="btrfs sub del /mnt/.snapshots/boot/boot-tmp"
+        )
+        subprocess.run(
+            shell=True, check=True, args="btrfs sub create /mnt/.snapshots/etc/etc-tmp"
+        )
+        #        subprocess.run(shell=True, check=True, args="btrfs sub create /mnt/.snapshots/var/var-tmp")
+        subprocess.run(
+            shell=True,
+            check=True,
+            args="btrfs sub create /mnt/.snapshots/boot/boot-tmp",
+        )
+        #        subprocess.run(shell=True, check=True, args="cp --reflink=auto -r /mnt/var/* /mnt/.snapshots/var/var-tmp")
         #        for i in ("pacman", "systemd"):
-        #            os.system(f"mkdir -p /mnt/.snapshots/var/var-tmp/lib/{i}")
-        #        os.system("cp --reflink=auto -r /mnt/var/lib/pacman/* /mnt/.snapshots/var/var-tmp/lib/pacman/")
-        #        os.system("cp --reflink=auto -r /mnt/var/lib/systemd/* /mnt/.snapshots/var/var-tmp/lib/systemd/")
-        os.system("cp --reflink=auto -r /mnt/boot/* /mnt/.snapshots/boot/boot-tmp")
-        os.system("cp --reflink=auto -r /mnt/etc/* /mnt/.snapshots/etc/etc-tmp")
-        #        os.system("btrfs sub snap -r /mnt/.snapshots/var/var-tmp /mnt/.snapshots/var/var-1")
-        os.system(
-            "btrfs sub snap -r /mnt/.snapshots/boot/boot-tmp /mnt/.snapshots/boot/boot-1"
+        #            subprocess.run(shell=True, check=True, args=f"mkdir -p /mnt/.snapshots/var/var-tmp/lib/{i}")
+        #        subprocess.run(shell=True, check=True, args="cp --reflink=auto -r /mnt/var/lib/pacman/* /mnt/.snapshots/var/var-tmp/lib/pacman/")
+        #        subprocess.run(shell=True, check=True, args="cp --reflink=auto -r /mnt/var/lib/systemd/* /mnt/.snapshots/var/var-tmp/lib/systemd/")
+        subprocess.run(
+            shell=True,
+            check=True,
+            args="cp --reflink=auto -r /mnt/boot/* /mnt/.snapshots/boot/boot-tmp",
         )
-        os.system(
-            "btrfs sub snap -r /mnt/.snapshots/etc/etc-tmp /mnt/.snapshots/etc/etc-1"
+        subprocess.run(
+            shell=True,
+            check=True,
+            args="cp --reflink=auto -r /mnt/etc/* /mnt/.snapshots/etc/etc-tmp",
         )
-        os.system(
-            "btrfs sub snap /mnt/.snapshots/rootfs/snapshot-1 /mnt/.snapshots/rootfs/snapshot-tmp"
+        #        subprocess.run(shell=True, check=True, args="btrfs sub snap -r /mnt/.snapshots/var/var-tmp /mnt/.snapshots/var/var-1")
+        subprocess.run(
+            shell=True,
+            check=True,
+            args="btrfs sub snap -r /mnt/.snapshots/boot/boot-tmp /mnt/.snapshots/boot/boot-1",
         )
-        os.system(
-            "arch-chroot /mnt btrfs sub set-default /.snapshots/rootfs/snapshot-tmp"
+        subprocess.run(
+            shell=True,
+            check=True,
+            args="btrfs sub snap -r /mnt/.snapshots/etc/etc-tmp /mnt/.snapshots/etc/etc-1",
+        )
+        subprocess.run(
+            shell=True,
+            check=True,
+            args="btrfs sub snap /mnt/.snapshots/rootfs/snapshot-1 /mnt/.snapshots/rootfs/snapshot-tmp",
+        )
+        subprocess.run(
+            shell=True,
+            check=True,
+            args="arch-chroot /mnt btrfs sub set-default /.snapshots/rootfs/snapshot-tmp",
         )
 
     elif DesktopInstall == 2:
-        os.system("echo '1' > /mnt/usr/share/ast/snap")
+        subprocess.run(
+            shell=True, check=True, args="echo '1' > /mnt/usr/share/ast/snap"
+        )
         packages.extend(
             [
                 "flatpak",
@@ -402,8 +562,12 @@ LOGO="astos-logo"
                 clear()
                 print("Enter username (all lowercase, max 8 letters)")
                 username = input("> ")
-        os.system(f"arch-chroot /mnt useradd {username}")
-        os.system(f"arch-chroot /mnt passwd {username}")
+        subprocess.run(
+            shell=True, check=True, args=f"arch-chroot /mnt useradd {username}"
+        )
+        subprocess.run(
+            shell=True, check=True, args=f"arch-chroot /mnt passwd {username}"
+        )
         while True:
             print("did your password set properly (y/n)?")
             reply = input("> ")
@@ -411,65 +575,121 @@ LOGO="astos-logo"
                 break
             else:
                 clear()
-                os.system(f"arch-chroot /mnt passwd {username}")
-        os.system(f"arch-chroot /mnt usermod -aG audio,input,video,wheel {username}")
-        os.system("arch-chroot /mnt passwd -l root")
-        os.system("chmod +w /mnt/etc/sudoers")
-        os.system("echo '%wheel ALL=(ALL:ALL) ALL' >> /mnt/etc/sudoers")
-        os.system("echo '[Theme]' > /mnt/etc/sddm.conf")
-        os.system("echo 'Current=breeze' >> /mnt/etc/sddm.conf")
-        os.system("chmod -w /mnt/etc/sudoers")
-        os.system(f"arch-chroot /mnt mkdir /home/{username}")
-        os.system(
-            f"echo 'export XDG_RUNTIME_DIR=\"/run/user/1000\"' >> /home/{username}/.bashrc"
+                subprocess.run(
+                    shell=True, check=True, args=f"arch-chroot /mnt passwd {username}"
+                )
+        subprocess.run(
+            shell=True,
+            check=True,
+            args=f"arch-chroot /mnt usermod -aG audio,input,video,wheel {username}",
         )
-        os.system(f"arch-chroot /mnt chown -R {username} /home/{username}")
-        os.system("arch-chroot /mnt systemctl enable sddm")
-        os.system("cp -r /mnt/var/lib/pacman/* /mnt/usr/share/ast/db")
-        os.system("btrfs sub snap -r /mnt /mnt/.snapshots/rootfs/snapshot-1")
-        os.system("btrfs sub del /mnt/.snapshots/etc/etc-tmp")
-        #        os.system("btrfs sub del /mnt/.snapshots/var/var-tmp")
-        os.system("btrfs sub del /mnt/.snapshots/boot/boot-tmp")
-        os.system("btrfs sub create /mnt/.snapshots/etc/etc-tmp")
-        #        os.system("btrfs sub create /mnt/.snapshots/var/var-tmp")
-        os.system("btrfs sub create /mnt/.snapshots/boot/boot-tmp")
-        #        os.system("cp --reflink=auto -r /mnt/var/* \
+        subprocess.run(shell=True, check=True, args="arch-chroot /mnt passwd -l root")
+        subprocess.run(shell=True, check=True, args="chmod +w /mnt/etc/sudoers")
+        subprocess.run(
+            shell=True,
+            check=True,
+            args="echo '%wheel ALL=(ALL:ALL) ALL' >> /mnt/etc/sudoers",
+        )
+        subprocess.run(
+            shell=True, check=True, args="echo '[Theme]' > /mnt/etc/sddm.conf"
+        )
+        subprocess.run(
+            shell=True, check=True, args="echo 'Current=breeze' >> /mnt/etc/sddm.conf"
+        )
+        subprocess.run(shell=True, check=True, args="chmod -w /mnt/etc/sudoers")
+        subprocess.run(
+            shell=True, check=True, args=f"arch-chroot /mnt mkdir /home/{username}"
+        )
+        subprocess.run(
+            shell=True,
+            check=True,
+            args=f"echo 'export XDG_RUNTIME_DIR=\"/run/user/1000\"' >> /home/{username}/.bashrc",
+        )
+        subprocess.run(
+            shell=True,
+            check=True,
+            args=f"arch-chroot /mnt chown -R {username} /home/{username}",
+        )
+        subprocess.run(
+            shell=True, check=True, args="arch-chroot /mnt systemctl enable sddm"
+        )
+        subprocess.run(
+            shell=True,
+            check=True,
+            args="cp -r /mnt/var/lib/pacman/* /mnt/usr/share/ast/db",
+        )
+        subprocess.run(
+            shell=True,
+            check=True,
+            args="btrfs sub snap -r /mnt /mnt/.snapshots/rootfs/snapshot-1",
+        )
+        subprocess.run(
+            shell=True, check=True, args="btrfs sub del /mnt/.snapshots/etc/etc-tmp"
+        )
+        #        subprocess.run(shell=True, check=True, args="btrfs sub del /mnt/.snapshots/var/var-tmp")
+        subprocess.run(
+            shell=True, check=True, args="btrfs sub del /mnt/.snapshots/boot/boot-tmp"
+        )
+        subprocess.run(
+            shell=True, check=True, args="btrfs sub create /mnt/.snapshots/etc/etc-tmp"
+        )
+        #        subprocess.run(shell=True, check=True, args="btrfs sub create /mnt/.snapshots/var/var-tmp")
+        subprocess.run(
+            shell=True,
+            check=True,
+            args="btrfs sub create /mnt/.snapshots/boot/boot-tmp",
+        )
+        #        subprocess.run(shell=True, check=True, args="cp --reflink=auto -r /mnt/var/* \
         #                   /mnt/.snapshots/var/var-tmp")
         #        for i in ("pacman", "systemd"):
-        #            os.system(f"mkdir -p /mnt/.snapshots/var/var-tmp/lib/{i}")
-        #        os.system("cp --reflink=auto -r /mnt/var/lib/pacman/* \
+        #            subprocess.run(shell=True, check=True, args=f"mkdir -p /mnt/.snapshots/var/var-tmp/lib/{i}")
+        #        subprocess.run(shell=True, check=True, args="cp --reflink=auto -r /mnt/var/lib/pacman/* \
         #                   /mnt/.snapshots/var/var-tmp/lib/pacman/")
-        #        os.system("cp --reflink=auto -r /mnt/var/lib/systemd/* \
+        #        subprocess.run(shell=True, check=True, args="cp --reflink=auto -r /mnt/var/lib/systemd/* \
         #                   /mnt/.snapshots/var/var-tmp/lib/systemd/")
-        os.system(
-            "cp --reflink=auto -r /mnt/boot/* \
-                   /mnt/.snapshots/boot/boot-tmp"
+        subprocess.run(
+            shell=True,
+            check=True,
+            args="cp --reflink=auto -r /mnt/boot/* \
+                   /mnt/.snapshots/boot/boot-tmp",
         )
-        os.system(
-            "cp --reflink=auto -r /mnt/etc/* \
-                   /mnt/.snapshots/etc/etc-tmp"
+        subprocess.run(
+            shell=True,
+            check=True,
+            args="cp --reflink=auto -r /mnt/etc/* \
+                   /mnt/.snapshots/etc/etc-tmp",
         )
-        #        os.system("btrfs sub snap -r /mnt/.snapshots/var/var-tmp \
+        #        subprocess.run(shell=True, check=True, args="btrfs sub snap -r /mnt/.snapshots/var/var-tmp \
         #                   /mnt/.snapshots/var/var-1")
-        os.system(
-            "btrfs sub snap -r /mnt/.snapshots/boot/boot-tmp \
-                   /mnt/.snapshots/boot/boot-1"
+        subprocess.run(
+            shell=True,
+            check=True,
+            args="btrfs sub snap -r /mnt/.snapshots/boot/boot-tmp \
+                   /mnt/.snapshots/boot/boot-1",
         )
-        os.system(
-            "btrfs sub snap -r /mnt/.snapshots/etc/etc-tmp \
-                   /mnt/.snapshots/etc/etc-1"
+        subprocess.run(
+            shell=True,
+            check=True,
+            args="btrfs sub snap -r /mnt/.snapshots/etc/etc-tmp \
+                   /mnt/.snapshots/etc/etc-1",
         )
-        os.system(
-            "btrfs sub snap /mnt/.snapshots/rootfs/snapshot-1 \
-                   /mnt/.snapshots/rootfs/snapshot-tmp"
+        subprocess.run(
+            shell=True,
+            check=True,
+            args="btrfs sub snap /mnt/.snapshots/rootfs/snapshot-1 \
+                   /mnt/.snapshots/rootfs/snapshot-tmp",
         )
-        os.system(
-            "arch-chroot /mnt btrfs sub set-default \
-                   /.snapshots/rootfs/snapshot-tmp"
+        subprocess.run(
+            shell=True,
+            check=True,
+            args="arch-chroot /mnt btrfs sub set-default \
+                   /.snapshots/rootfs/snapshot-tmp",
         )
 
     elif DesktopInstall == 3:
-        os.system("echo '1' > /mnt/usr/share/ast/snap")
+        subprocess.run(
+            shell=True, check=True, args="echo '1' > /mnt/usr/share/ast/snap"
+        )
         packages.extend(
             [
                 "flatpak",
@@ -510,8 +730,12 @@ LOGO="astos-logo"
                 clear()
                 print("Enter username (all lowercase, max 8 letters)")
                 username = input("> ")
-        os.system(f"arch-chroot /mnt useradd {username}")
-        os.system(f"arch-chroot /mnt passwd {username}")
+        subprocess.run(
+            shell=True, check=True, args=f"arch-chroot /mnt useradd {username}"
+        )
+        subprocess.run(
+            shell=True, check=True, args=f"arch-chroot /mnt passwd {username}"
+        )
         while True:
             print("did your password set properly (y/n)?")
             reply = input("> ")
@@ -519,128 +743,202 @@ LOGO="astos-logo"
                 break
             else:
                 clear()
-                os.system(f"arch-chroot /mnt passwd {username}")
-        os.system(
-            f"arch-chroot /mnt usermod -aG \
-                    audio,input,video,wheel {username}"
+                subprocess.run(
+                    shell=True, check=True, args=f"arch-chroot /mnt passwd {username}"
+                )
+        subprocess.run(
+            shell=True,
+            check=True,
+            args=f"arch-chroot /mnt usermod -aG \
+                    audio,input,video,wheel {username}",
         )
-        os.system("arch-chroot /mnt passwd -l root")
-        os.system("chmod +w /mnt/etc/sudoers")
-        os.system("echo '%wheel ALL=(ALL:ALL) ALL' >> /mnt/etc/sudoers")
-        os.system("chmod -w /mnt/etc/sudoers")
-        os.system(f"arch-chroot /mnt mkdir /home/{username}")
-        os.system(
-            f"echo 'export XDG_RUNTIME_DIR=\"/run/user/1000\"' \
-                    >> /home/{username}/.bashrc"
+        subprocess.run(shell=True, check=True, args="arch-chroot /mnt passwd -l root")
+        subprocess.run(shell=True, check=True, args="chmod +w /mnt/etc/sudoers")
+        subprocess.run(
+            shell=True,
+            check=True,
+            args="echo '%wheel ALL=(ALL:ALL) ALL' >> /mnt/etc/sudoers",
         )
-        os.system(f"arch-chroot /mnt chown -R {username} /home/{username}")
-        os.system("arch-chroot /mnt systemctl enable gdm")
-        os.system("cp -r /mnt/var/lib/pacman/* /mnt/usr/share/ast/db")
-        os.system("btrfs sub snap -r /mnt /mnt/.snapshots/rootfs/snapshot-1")
-        os.system("btrfs sub del /mnt/.snapshots/etc/etc-tmp")
-        #        os.system("btrfs sub del /mnt/.snapshots/var/var-tmp")
-        os.system("btrfs sub del /mnt/.snapshots/boot/boot-tmp")
-        os.system("btrfs sub create /mnt/.snapshots/etc/etc-tmp")
-        #        os.system("btrfs sub create /mnt/.snapshots/var/var-tmp")
-        os.system("btrfs sub create /mnt/.snapshots/boot/boot-tmp")
-        #        os.system("cp --reflink=auto -r /mnt/var/* \
+        subprocess.run(shell=True, check=True, args="chmod -w /mnt/etc/sudoers")
+        subprocess.run(
+            shell=True, check=True, args=f"arch-chroot /mnt mkdir /home/{username}"
+        )
+        subprocess.run(
+            shell=True,
+            check=True,
+            args=f"echo 'export XDG_RUNTIME_DIR=\"/run/user/1000\"' \
+                    >> /home/{username}/.bashrc",
+        )
+        subprocess.run(
+            shell=True,
+            check=True,
+            args=f"arch-chroot /mnt chown -R {username} /home/{username}",
+        )
+        subprocess.run(
+            shell=True, check=True, args="arch-chroot /mnt systemctl enable gdm"
+        )
+        subprocess.run(
+            shell=True,
+            check=True,
+            args="cp -r /mnt/var/lib/pacman/* /mnt/usr/share/ast/db",
+        )
+        subprocess.run(
+            shell=True,
+            check=True,
+            args="btrfs sub snap -r /mnt /mnt/.snapshots/rootfs/snapshot-1",
+        )
+        subprocess.run(
+            shell=True, check=True, args="btrfs sub del /mnt/.snapshots/etc/etc-tmp"
+        )
+        #        subprocess.run(shell=True, check=True, args="btrfs sub del /mnt/.snapshots/var/var-tmp")
+        subprocess.run(
+            shell=True, check=True, args="btrfs sub del /mnt/.snapshots/boot/boot-tmp"
+        )
+        subprocess.run(
+            shell=True, check=True, args="btrfs sub create /mnt/.snapshots/etc/etc-tmp"
+        )
+        #        subprocess.run(shell=True, check=True, args="btrfs sub create /mnt/.snapshots/var/var-tmp")
+        subprocess.run(
+            shell=True,
+            check=True,
+            args="btrfs sub create /mnt/.snapshots/boot/boot-tmp",
+        )
+        #        subprocess.run(shell=True, check=True, args="cp --reflink=auto -r /mnt/var/* \
         #                   /mnt/.snapshots/var/var-tmp")
         #        for i in ("pacman", "systemd"):
-        #            os.system(f"mkdir -p /mnt/.snapshots/var/var-tmp/lib/{i}")
-        #        os.system("cp --reflink=auto -r /mnt/var/lib/pacman/* \
+        #            subprocess.run(shell=True, check=True, args=f"mkdir -p /mnt/.snapshots/var/var-tmp/lib/{i}")
+        #        subprocess.run(shell=True, check=True, args="cp --reflink=auto -r /mnt/var/lib/pacman/* \
         #        /mnt/.snapshots/var/var-tmp/lib/pacman/")
-        #        os.system("cp --reflink=auto -r /mnt/var/lib/systemd/* \
+        #        subprocess.run(shell=True, check=True, args="cp --reflink=auto -r /mnt/var/lib/systemd/* \
         #        /mnt/.snapshots/var/var-tmp/lib/systemd/")
-        os.system(
-            "cp --reflink=auto -r /mnt/boot/* \
-                /mnt/.snapshots/boot/boot-tmp"
+        subprocess.run(
+            shell=True,
+            check=True,
+            args="cp --reflink=auto -r /mnt/boot/* \
+                /mnt/.snapshots/boot/boot-tmp",
         )
-        os.system(
-            "cp --reflink=auto -r /mnt/etc/* \
-                /mnt/.snapshots/etc/etc-tmp"
+        subprocess.run(
+            shell=True,
+            check=True,
+            args="cp --reflink=auto -r /mnt/etc/* \
+                /mnt/.snapshots/etc/etc-tmp",
         )
-        #        os.system("btrfs sub snap -r /mnt/.snapshots/var/var-tmp \
+        #        subprocess.run(shell=True, check=True, args="btrfs sub snap -r /mnt/.snapshots/var/var-tmp \
         #            /mnt/.snapshots/var/var-1")
-        os.system(
-            "btrfs sub snap -r /mnt/.snapshots/boot/boot-tmp \
-                /mnt/.snapshots/boot/boot-1"
+        subprocess.run(
+            shell=True,
+            check=True,
+            args="btrfs sub snap -r /mnt/.snapshots/boot/boot-tmp \
+                /mnt/.snapshots/boot/boot-1",
         )
-        os.system(
-            "btrfs sub snap -r /mnt/.snapshots/etc/etc-tmp \
-                /mnt/.snapshots/etc/etc-1"
+        subprocess.run(
+            shell=True,
+            check=True,
+            args="btrfs sub snap -r /mnt/.snapshots/etc/etc-tmp \
+                /mnt/.snapshots/etc/etc-1",
         )
-        os.system(
-            "btrfs sub snap /mnt/.snapshots/rootfs/snapshot-1 \
-                /mnt/.snapshots/rootfs/snapshot-tmp"
+        subprocess.run(
+            shell=True,
+            check=True,
+            args="btrfs sub snap /mnt/.snapshots/rootfs/snapshot-1 \
+                /mnt/.snapshots/rootfs/snapshot-tmp",
         )
-        os.system(
-            "arch-chroot /mnt btrfs sub set-default \
-                /.snapshots/rootfs/snapshot-tmp"
+        subprocess.run(
+            shell=True,
+            check=True,
+            args="arch-chroot /mnt btrfs sub set-default \
+                /.snapshots/rootfs/snapshot-tmp",
         )
 
     else:
-        os.system(
-            "btrfs sub snap /mnt/.snapshots/rootfs/snapshot-0 /mnt/.snapshots/rootfs/snapshot-tmp"
+        subprocess.run(
+            shell=True,
+            check=True,
+            args="btrfs sub snap /mnt/.snapshots/rootfs/snapshot-0 /mnt/.snapshots/rootfs/snapshot-tmp",
         )
-        os.system(
-            "arch-chroot /mnt btrfs sub set-default /.snapshots/rootfs/snapshot-tmp"
+        subprocess.run(
+            shell=True,
+            check=True,
+            args="arch-chroot /mnt btrfs sub set-default /.snapshots/rootfs/snapshot-tmp",
         )
 
-    os.system("cp -r /mnt/root/. /mnt/.snapshots/root/")
-    os.system("cp -r /mnt/tmp/. /mnt/.snapshots/tmp/")
-    os.system("rm -rf /mnt/root/*")
-    os.system("rm -rf /mnt/tmp/*")
-    #    os.system("umount /mnt/var")
+    subprocess.run(
+        shell=True, check=True, args="cp -r /mnt/root/. /mnt/.snapshots/root/"
+    )
+    subprocess.run(shell=True, check=True, args="cp -r /mnt/tmp/. /mnt/.snapshots/tmp/")
+    subprocess.run(shell=True, check=True, args="rm -rf /mnt/root/*")
+    subprocess.run(shell=True, check=True, args="rm -rf /mnt/tmp/*")
+    #    subprocess.run(shell=True, check=True, args="umount /mnt/var")
 
     if efi:
-        os.system("umount /mnt/boot/efi")
+        subprocess.run(shell=True, check=True, args="umount /mnt/boot/efi")
 
-    os.system("umount /mnt/boot")
-    #    os.system("mkdir /mnt/.snapshots/var/var-tmp")
-    #    os.system("mkdir /mnt/.snapshots/boot/boot-tmp")
-    #    os.system(f"mount {args[1]} -o subvol=@var,compress=zstd,noatime \
+    subprocess.run(shell=True, check=True, args="umount /mnt/boot")
+    #    subprocess.run(shell=True, check=True, args="mkdir /mnt/.snapshots/var/var-tmp")
+    #    subprocess.run(shell=True, check=True, args="mkdir /mnt/.snapshots/boot/boot-tmp")
+    #    subprocess.run(shell=True, check=True, args=f"mount {args[1]} -o subvol=@var,compress=zstd,noatime \
     #    /mnt/.snapshots/var/var-tmp")
-    os.system(
-        f"mount {args[1]} -o subvol=@boot,compress=zstd,noatime \
-    /mnt/.snapshots/boot/boot-tmp"
+    subprocess.run(
+        shell=True,
+        check=True,
+        args=f"mount {args[1]} -o subvol=@boot,compress=zstd,noatime \
+    /mnt/.snapshots/boot/boot-tmp",
     )
-    #    os.system("cp --reflink=auto -r /mnt/.snapshots/var/var-tmp/* /mnt/var")
-    os.system("cp --reflink=auto -r /mnt/.snapshots/boot/boot-tmp/* /mnt/boot")
-    os.system("umount /mnt/etc")
-    #    os.system("mkdir /mnt/.snapshots/etc/etc-tmp")
-    os.system(
-        f"mount {args[1]} -o subvol=@etc,compress=zstd,noatime \
-    /mnt/.snapshots/etc/etc-tmp"
+    #    subprocess.run(shell=True, check=True, args="cp --reflink=auto -r /mnt/.snapshots/var/var-tmp/* /mnt/var")
+    subprocess.run(
+        shell=True,
+        check=True,
+        args="cp --reflink=auto -r /mnt/.snapshots/boot/boot-tmp/* /mnt/boot",
     )
-    os.system("cp --reflink=auto -r /mnt/.snapshots/etc/etc-tmp/* /mnt/etc")
+    subprocess.run(shell=True, check=True, args="umount /mnt/etc")
+    #    subprocess.run(shell=True, check=True, args="mkdir /mnt/.snapshots/etc/etc-tmp")
+    subprocess.run(
+        shell=True,
+        check=True,
+        args=f"mount {args[1]} -o subvol=@etc,compress=zstd,noatime \
+    /mnt/.snapshots/etc/etc-tmp",
+    )
+    subprocess.run(
+        shell=True,
+        check=True,
+        args="cp --reflink=auto -r /mnt/.snapshots/etc/etc-tmp/* /mnt/etc",
+    )
 
     if DesktopInstall:
-        os.system(
-            "cp --reflink=auto -r /mnt/.snapshots/etc/etc-1/* \
-        /mnt/.snapshots/rootfs/snapshot-tmp/etc"
+        subprocess.run(
+            shell=True,
+            check=True,
+            args="cp --reflink=auto -r /mnt/.snapshots/etc/etc-1/* \
+        /mnt/.snapshots/rootfs/snapshot-tmp/etc",
         )
-        #        os.system("cp --reflink=auto -r /mnt/.snapshots/var/var-1/* \
+        #        subprocess.run(shell=True, check=True, args="cp --reflink=auto -r /mnt/.snapshots/var/var-1/* \
         #        /mnt/.snapshots/rootfs/snapshot-tmp/var")
-        os.system(
-            "cp --reflink=auto -r /mnt/.snapshots/boot/boot-1/* \
-        /mnt/.snapshots/rootfs/snapshot-tmp/boot"
+        subprocess.run(
+            shell=True,
+            check=True,
+            args="cp --reflink=auto -r /mnt/.snapshots/boot/boot-1/* \
+        /mnt/.snapshots/rootfs/snapshot-tmp/boot",
         )
     else:
-        os.system(
-            "cp --reflink=auto -r /mnt/.snapshots/etc/etc-0/* \
-        /mnt/.snapshots/rootfs/snapshot-tmp/etc"
+        subprocess.run(
+            shell=True,
+            check=True,
+            args="cp --reflink=auto -r /mnt/.snapshots/etc/etc-0/* \
+        /mnt/.snapshots/rootfs/snapshot-tmp/etc",
         )
-        #        os.system("cp --reflink=auto -r /mnt/.snapshots/var/var-0/* \
+        #        subprocess.run(shell=True, check=True, args="cp --reflink=auto -r /mnt/.snapshots/var/var-0/* \
         #        /mnt/.snapshots/rootfs/snapshot-tmp/var")
-        os.system(
-            "cp --reflink=auto -r /mnt/.snapshots/boot/boot-0/* \
-        /mnt/.snapshots/rootfs/snapshot-tmp/boot"
+        subprocess.run(
+            shell=True,
+            check=True,
+            args="cp --reflink=auto -r /mnt/.snapshots/boot/boot-0/* \
+        /mnt/.snapshots/rootfs/snapshot-tmp/boot",
         )
 
-    os.system("umount -R /mnt")
-    os.system(f"mount {args[1]} -o subvolid=0 /mnt")
-    os.system("btrfs sub del /mnt/@")
-    os.system("umount -R /mnt")
+    subprocess.run(shell=True, check=True, args="umount -R /mnt")
+    subprocess.run(shell=True, check=True, args=f"mount {args[1]} -o subvolid=0 /mnt")
+    subprocess.run(shell=True, check=True, args="btrfs sub del /mnt/@")
+    subprocess.run(shell=True, check=True, args="umount -R /mnt")
     clear()
     print("Installation complete")
     print("You can reboot now :)")
