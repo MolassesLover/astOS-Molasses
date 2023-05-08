@@ -113,7 +113,8 @@ uURF$##Bv       nKWB$%ABc       aM@3R@D@b
     subprocess.run(shell=True, check=True, args="umount /mnt")
 
     for mntdir in mntdirs:
-        subprocess.run(shell=True, check=True, args=f"mkdir /mnt/{mntdir}")
+        if os.path.exists(f"/mnt/{mntdir}") is not True:
+            subprocess.run(shell=True, check=True, args=f"/{mntdir}")
         subprocess.run(
             shell=True,
             check=True,
@@ -130,7 +131,8 @@ uURF$##Bv       nKWB$%ABc       aM@3R@D@b
         subprocess.run(shell=True, check=True, args=f"mkdir -p /mnt/.snapshots/ast/{i}")
 
     if efi:
-        subprocess.run(shell=True, check=True, args="mkdir /mnt/boot/efi")
+        if os.path.exists("/mnt/boot/efi") is not True:
+            subprocess.run(shell=True, check=True, args="mkdir /mnt/boot/efi")
         subprocess.run(shell=True, check=True, args=f"mount {args[3]} /mnt/boot/efi")
 
     packages = [
