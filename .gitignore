@@ -1,6 +1,9 @@
 # Prerequisites
 *.d
 
+# Do not ignore SystemD directories
+!live/**/*.d
+
 # Compiled Object files
 *.slo
 *.lo
@@ -34,6 +37,9 @@
 [Bb]uild
 [Bb]in
 [Tt]arget
+
+# Do not ignore these, they aren't binaries:
+!live/airootfs/usr/local/bin
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
