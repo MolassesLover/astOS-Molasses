@@ -8,9 +8,9 @@
 
 -----------------------------------------------------------------------
 
-I moved the Python (`.py`) files into the [`src/`](src/) directory,
-moved the non-English README files into the [`docs/`](docs/) directory,
-and moved the logo art into the [`docs/img`](docs/img) directory.
+I moved the Python (`.py`) files into the [`src/`](../src/) directory,
+moved the non-English README files into the [`docs/`](../docs/) directory,
+and moved the logo art into the [`docs/img/`](../docs/img/) directory.
 
 I also replaced the plain text AGPL v3.0 license with its Markdown
 variation, sourced directly from [gnu.org](https://www.gnu.org/).
