@@ -42,6 +42,7 @@
 # Live image
 *.iso
 *.img
+live/airootfs/root/Installer/*
 
 # Do not ignore these, they aren't binaries:
 !live/airootfs/usr/local/bin

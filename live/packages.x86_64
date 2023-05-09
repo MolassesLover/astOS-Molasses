@@ -1,7 +1,6 @@
 alsa-utils
 amd-ucode
 arch-install-scripts
-archinstall
 b43-fwcutter
 base
 bind
@@ -86,6 +85,7 @@ pcsclite
 ppp
 pptpclient
 pv
+python
 qemu-guest-agent
 refind
 reflector

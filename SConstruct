@@ -4,12 +4,24 @@ import colorama
 from colorama import Fore
 import os
 import subprocess
+import shutil
+import pathlib
 
+def copy_files():
+    subprocess.run(shell=True, check=True, args="chmod +w live/airootfs/root/Installer/*")
+
+    for path in pathlib.Path("src/").glob("*.py"):
+        print(f":: Copying {Fore.BLUE}{path}{Fore.RESET} to {Fore.BLUE}live/airootfs/root/Installer/{Fore.RESET}")
+        shutil.copyfile(path, f"live/airootfs/root/Installer/{os.path.basename(path)}")
+
+    subprocess.run(shell=True, check=True, args="chmod -w live/airootfs/root/Installer/*")
 
 def build():
+    copy_files()
+
     if bool(os.path.exists("/tmp/astOS-tmp")):
         print(
-            f":: Directory {Fore.YELLOW}/tmp/astOS-tmp{Fore.RESET} exists, {Fore.RED}deleting{Fore.RESET} it."
+            f":: Directory {Fore.BLUE}/tmp/astOS-tmp{Fore.RESET} exists, {Fore.RED}deleting{Fore.RESET} it."
         )
 
         subprocess.run(
@@ -36,11 +48,11 @@ match __name__:
         build()
     case "SConstruct":
         print(
-            f":: {Fore.RED}Error{Fore.RESET}: The {Fore.YELLOW}SConstruct{Fore.RESET} file should not be used as a module."
+            f":: {Fore.RED}Error{Fore.RESET}: The {Fore.BLUE}SConstruct{Fore.RESET} file should not be used as a module."
         )
         sys.exit(1)
     case _:
         print(
-            f":: {Fore.RED}Error{Fore.RESET}: The {Fore.YELLOW}SConstruct{Fore.RESET} script seems to have been used abnormally, exiting..."
+            f":: {Fore.RED}Error{Fore.RESET}: The {Fore.BLUE}SConstruct{Fore.RESET} script seems to have been used abnormally, exiting..."
         )
         sys.exit(1)

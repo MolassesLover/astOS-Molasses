@@ -1,0 +1,7 @@
+NAME="astOS"
+PRETTY_NAME="astOS"
+ID="astos"
+BUILD_ID="rolling"
+ANSI_COLOR="38;2;23;147;209"
+HOME_URL="https://github.com/CuBeRJAN/astOS"
+LOGO="astos-logo"
