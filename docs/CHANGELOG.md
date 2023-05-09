@@ -65,3 +65,13 @@ This commit introduced the "Run live image in QEMU" task for
 Visual Studio Code. As the name might suggest, it loads the live image
 into QEMU. The task specifically runs the
 [run_in_qemu.sh](src/dev/run_in_qemu.sh) script
+
+-----------------------------------------------------------------------
+
+## **Git commit**: `795180f1727e6f2c371bb0429780b038224e8461`
+*By* ***MolassesLover*** 
+
+-----------------------------------------------------------------------
+
+I replaced various instances of the 'Arch' name to 'astOs.' Aside from
+that, the live image should now ship with the installer by default.
